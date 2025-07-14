@@ -1,0 +1,12 @@
+
+Django==4.2
+beautifulsoup4==4.12.2
+requests==2.31.0
+gTTS==2.3.2
+pandas==2.0.3
+python-decouple==3.8
+feedparser==6.0.10
+lxml==4.9.3
+Pillow==10.0.1
+feedparser==6.0.10 
+lxml==4.9.3 
