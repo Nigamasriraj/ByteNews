@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}All Articles{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Search bar -->
+    <form method="GET" class="mb-4 d-flex">
+        <input type="text" name="q" placeholder="Search articles..." class="form-control me-2"
+               value="{{ search_query }}">
+        {% if current_category != 'All' %}
+            <input type="hidden" name="category" value="{{ current_category }}">
+        {% endif %}
+        <button type="submit" class="btn btn-outline-success">Search</button>
+    </form>
+
+    <!-- Categories -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h1 class="mb-0 text-center w-100">Latest ByteNews Articles {% if current_category != 'All' %}in {{ current_category }}{% endif %}</h1>
+
+    </div>
+
+    <div class="category-bar mb-4">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'news:article_list' %}"
+               class="btn btn-sm {% if current_category == 'All' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                All Categories
+            </a>
+            {% for category in categories %}
+                <a href="{% url 'news:article_list' %}?category={{ category.name }}{% if search_query %}&q={{ search_query }}{% endif %}"
+                   class="btn btn-sm {% if current_category == category.name %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                    {{ category.name }} ({{ category.article_count }})
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Articles -->
+    <div class="row">
+        {% for article in articles %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ article.title }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            By {{ article.author|default:"Unknown" }} on {{ article.published_date|date:"F d, Y" }}
+                        </h6>
+                        <span class="badge bg-primary me-1">{{ article.category.name }}</span>
+                        <p class="card-text mt-2">{{ article.content|truncatechars:150 }}</p>
+                        <a href="{% url 'news:detail' article.pk %}" class="btn btn-sm btn-primary">Read More</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="col-12">No articles found.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand" href="/">ByteNews</a>
+
+    <div class="collapse navbar-collapse justify-content-end">
+        <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:dashboard' %}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:register' %}">Sign Up</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+    {% endif %}
+</div>
+{% endblock %}
