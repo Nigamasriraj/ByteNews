@@ -1,13 +1,19 @@
-{% extends "base.html" %}
-
-{% block title %}Welcome to ByteNews{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Home - ByteNews{% endblock %}
 
 {% block content %}
-<div class="text-center mt-5">
-    <h1>Welcome to ByteNews 👋</h1>
-    <p>Get the latest curated news, technology insights, and more.</p>
-
-    <a href="{% url 'users:login' %}" class="btn btn-primary m-2">Login</a>
-    <a href="{% url 'users:register' %}" class="btn btn-outline-primary m-2">Sign Up</a>
+<h2 class="mb-4">Top Stories</h2>
+<div class="row">
+    {% for article in articles %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card article-card p-3">
+                <h5>{{ article.title }}</h5>
+                <p>{{ article.summary }}</p>
+                <a href="{% url 'news:article_detail' slug=article.slug %}" class="btn btn-sm btn-blue mt-2">Read More</a>
+            </div>
+        </div>
+    {% empty %}
+        <p>No articles found.</p>
+    {% endfor %}
 </div>
 {% endblock %}

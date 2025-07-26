@@ -1,63 +1,36 @@
+# bytenews/users/views.py
+
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.views.generic import ListView
-from news.models import Article, Category  # ✅ correct place
+from django.contrib.auth.decorators import login_required # Decorator to restrict access to logged-in users
+from django.contrib import messages # For displaying messages to the user
+from .forms import UserPreferenceForm, CustomUserCreationForm # Import your forms
+from .models import UserPreference # CORRECTED: Import UserPreference model from the current app's models
 
-def public_home(request):
-    if request.user.is_authenticated:
-        return redirect('news:article_list')
-    return render(request, 'users/home.html')  # Show login/signup if not logged in
-
-
-# Login view
-def login_view(request):
-    form = AuthenticationForm(request, data=request.POST or None)
+def register(request):
     if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('news:article_list')  # <- VERY IMPORTANT
-    return render(request, 'users/login.html', {'form': form})
-
-
-# Register view
-def register_view(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('users:home')  # or 'dashboard'
+            user = form.save() # Save the new user
+            messages.success(request, f'Account created for {user.username}! You can now log in.')
+            return redirect('login') # Redirect to the login page
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, 'users/register.html', {'form': form})
 
+@login_required # Ensures only logged-in users can access this view
+def preferences(request):
+    # Get the user's existing preferences, or create a new one if it doesn't exist
+    # get_or_create is ideal for OneToOneField relationships
+    user_preference, created = UserPreference.objects.get_or_create(user=request.user)
 
-
-# Logout
-def logout_view(request):
-    logout(request)
-    return redirect('news:article_list')
-
-# Article list view
-class ArticleListView(ListView):
-    model = Article
-    template_name = 'news/article_list.html'
-    context_object_name = 'articles'
-    ordering = ['-publication_date']
-    paginate_by = 10
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        category_name = self.request.GET.get('category')
-        if category_name:
-            queryset = queryset.filter(categories__name__iexact=category_name)
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all().order_by('name')
-        context['current_category'] = self.request.GET.get('category', 'All')
-        return context
+    if request.method == 'POST':
+        # If form is submitted, bind data to the form instance
+        form = UserPreferenceForm(request.POST, instance=user_preference)
+        if form.is_valid():
+            form.save() # Save the updated preferences
+            messages.success(request, 'Your preferences have been updated!')
+            return redirect('users:preferences') # Redirect back to the preferences page
+    else:
+        # If it's a GET request, pre-fill the form with existing preferences
+        form = UserPreferenceForm(instance=user_preference)
+    return render(request, 'users/preferences.html', {'form': form})

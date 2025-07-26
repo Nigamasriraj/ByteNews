@@ -1,11 +1,14 @@
-from django.urls import path
-from . import views
+# bytenews/users/urls.py
 
-app_name = 'users'
+from django.urls import path
+from . import views # Import views from the current app
+
+app_name = 'users' # Define the app namespace
+
 urlpatterns = [
-    path('', views.public_home, name='home'),
-    path('login/', views.login_view, name='login'),
-    path('register/', views.register_view, name='register'),
-    #path('dashboard/', views.dashboard, name='dashboard'),
-    path('logout/', views.logout_view, name='logout'),
+    # URL for the preferences page
+    path('preferences/', views.preferences, name='preferences'),
+    # REMOVED: path('login/', views.CustomLoginView.as_view(), name='login'),
+    # The 'login' URL is handled directly in the main bytenews/urls.py using Django's built-in auth views.
+    # The 'register' URL is also handled in the main bytenews/urls.py.
 ]

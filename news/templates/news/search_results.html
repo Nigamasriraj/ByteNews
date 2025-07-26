@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Search Results for "{{ query }}"</h2>
+
+    <div class="row">
+        {% for article in articles %}
+            <div class="col-md-6 col-lg-4 mb-4"> {# Added col-lg-4 for 3 columns on large screens #}
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ article.title }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            By {{ article.author|default:"Unknown" }} on {{ article.published_date|date:"M j, Y" }}
+                        </h6>
+                        <span class="badge bg-primary me-1 category-tag">{{ article.category.name }}</span> {# Added category-tag class here #}
+                        <p class="card-text mt-2">{{ article.content|truncatechars:200 }}</p>
+                        <a href="{% url 'news:article_detail' article.pk %}" class="read-more-button">Read More</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %} {# Corrected: Use empty for no items in loop #}
+            <p class="col-12">No articles found for "{{ query }}".</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

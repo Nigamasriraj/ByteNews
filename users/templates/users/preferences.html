@@ -1,0 +1,34 @@
+{# bytenews/users/templates/users/preferences.html #}
+{% extends 'base.html' %}
+{# REMOVED: {% load crispy_forms_tags %} #}
+{# {% load widget_tweaks %} is optional here as we are manually rendering checkboxes, but harmless #}
+
+{% block title %}Your Preferences{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Your News Preferences</h2>
+    <p class="mb-4">Select the categories you are most interested in:</p>
+    <form method="post">
+        {% csrf_token %}
+
+        {# Manual rendering for checkboxes to apply Bootstrap's form-check classes #}
+        <div class="mb-3">
+            <label class="form-label"><strong>Preferred Categories:</strong></label>
+            {% for checkbox in form.preferred_categories %}
+                <div class="form-check">
+                    {{ checkbox.tag }} {# Renders the <input type="checkbox"> tag #}
+                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                        {{ checkbox.choice_label }} {# Renders the category name #}
+                    </label>
+                </div>
+            {% endfor %}
+            {% for error in form.preferred_categories.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Save Preferences</button>
+    </form>
+</div>
+{% endblock %}

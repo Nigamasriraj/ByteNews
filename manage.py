@@ -6,6 +6,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    # THIS LINE HAS BEEN CORRECTED: 'ByteNews.settings' to match your folder's casing
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ByteNews.settings')
     try:
         from django.core.management import execute_from_command_line
@@ -20,3 +21,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
