@@ -1,30 +1,139 @@
-{# bytenews/news/templates/news/article_detail.html #}
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ article.title }}{% endblock %}
+{% block title %}{{ article.title }} - ByteNews{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <div class="card p-4">
-        <h1 class="mb-3">{{ article.title }}</h1>
-        <p class="text-muted">
-            By {{ article.author.username }} on {{ article.publication_date|date:"M d, Y" }}
-        </p>
-        <div class="mb-4">
-            Categories:
-            {% for category in article.categories.all %}
-                <a href="{% url 'news:article_list' %}?category={{ category.name }}">{{ category.name }}</a>{% if not forloop.last %}, {% endif %}
-            {% empty %}
-                N/A
-            {% endfor %}
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card p-4 mb-4">
+                <h1 class="mb-3">{{ article.title }}</h1>
+                <p class="article-detail-meta text-muted">
+                    By {{ article.author|default:"Unknown" }} on {{ article.publication_date|date:"F d, Y" }}
+                    {% if article.categories.exists %}
+                        | Categories:
+                        {% for category in article.categories.all %}
+                            <span class="badge category-tag">{{ category.name }}</span>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </p>
+                <hr>
+
+                {# Main Article Content #}
+                <p>{{ article.content|linebreaksbr }}</p>
+
+                {# Summary Section - Visibility controlled by JS #}
+                <div id="articleSummarySection" class="card bg-light mt-4 mb-3" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title">Article Summary</h5>
+                        {# Summary content will be populated by JS or directly from Django context #}
+                        <p class="card-text" id="summaryContent">{{ article.summary|default_if_none:"" }}</p>
+                        {% if user.is_authenticated %}
+                            <div class="d-flex align-items-center mt-3">
+                                <small class="text-muted me-2">Was this summary helpful?</small>
+                                {# Helpful button (Task 4) #}
+                                <form method="post" action="{% url 'news:submit_summary_feedback' slug=article.slug %}" class="d-inline-block me-2">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="is_helpful" value="true">
+                                    <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-hand-thumbs-up"></i> Yes</button>
+                                </form>
+                                {# Not Helpful button (Task 4) #}
+                                <form method="post" action="{% url 'news:submit_summary_feedback' slug=article.slug %}" class="d-inline-block">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="is_helpful" value="false">
+                                    <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-hand-thumbs-down"></i> No</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Buttons container for alignment #}
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    {# Back to Articles button - Left aligned, blue, and small #}
+                    <a href="{% url 'news:article_list' %}" class="btn btn-primary btn-sm">Back to Articles</a>
+
+                    {# Generate Summary Button and Length Input - Right aligned #}
+                    {% if user.is_authenticated %}
+                        <div class="d-flex align-items-center">
+                            <label for="summaryLength" class="form-label mb-0 me-2 text-muted">Lines:</label>
+                            <input type="number" id="summaryLength" class="form-control form-control-sm me-2" value="10" min="1" max="50" style="width: 70px;">
+                            <button id="generateSummaryBtn" class="btn btn-primary btn-sm" data-slug="{{ article.slug }}">
+                                Generate/Regenerate Summary
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div id="summaryLoading" class="text-center mt-3 mb-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading summary...</span>
+                    </div>
+                    <p class="text-muted mt-2">Generating summary...</p>
+                </div>
+
+            </div>
         </div>
-        <hr>
-        <div class="article-content">
-            <p>{{ article.content|linebreaksbr }}</p> {# Render content with line breaks #}
-        </div>
-        <hr>
-        {# CORRECTED: Ensure this URL points to 'news:article_list' #}
-        <a href="{% url 'news:article_list' %}" class="btn btn-secondary mt-3">Back to Articles</a>
     </div>
 </div>
 {% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const generateBtn = document.getElementById('generateSummaryBtn');
+        const summaryLengthInput = document.getElementById('summaryLength');
+        const summarySection = document.getElementById('articleSummarySection');
+        const summaryContent = document.getElementById('summaryContent');
+        const summaryLoading = document.getElementById('summaryLoading');
+
+        // Initial check: If a summary already exists, show the section
+        if (summaryContent.textContent.trim() !== "") {
+            summarySection.style.display = 'block';
+        } else {
+            summarySection.style.display = 'none';
+        }
+
+        if (generateBtn) {
+            generateBtn.addEventListener('click', async function() {
+                const slug = this.dataset.slug;
+                const numSentences = summaryLengthInput.value;
+                // Construct URL with num_sentences as a query parameter
+                const url = `/article/${slug}/generate_summary/?num_sentences=${numSentences}`;
+
+                // Show loading indicator, hide summary section
+                summaryLoading.style.display = 'block';
+                summarySection.style.display = 'none'; // Ensure summary is hidden while generating
+                generateBtn.disabled = true; // Disable button during generation
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET', // Correctly using GET
+                        // Removed Content-Type and X-CSRFToken for GET request as they are not needed
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    if (data.summary) {
+                        summaryContent.textContent = data.summary;
+                        summarySection.style.display = 'block'; // Show summary section on success
+                    } else {
+                        summaryContent.textContent = "Summary could not be generated.";
+                        summarySection.style.display = 'block'; // Show section even with error message
+                    }
+
+                } catch (error) {
+                    console.error('Error generating summary:', error);
+                    summaryContent.textContent = "Failed to generate summary. Please try again.";
+                    summarySection.style.display = 'block'; // Show section with error message
+                } finally {
+                    summaryLoading.style.display = 'none'; // Hide loading indicator
+                    generateBtn.disabled = false; // Re-enable button
+                }
+            });
+        }
+    });
+</script>

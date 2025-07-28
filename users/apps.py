@@ -8,4 +8,4 @@ class UsersConfig(AppConfig):
 
     def ready(self):
         # Import signals here so they are registered when the app is ready
-        import users.signals # <--- Make sure this line exists and is correct
+        import users.signals # Make sure this line exists and is correct

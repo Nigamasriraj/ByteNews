@@ -2,72 +2,177 @@
 
 import feedparser
 import requests
-import time
+from bs4 import BeautifulSoup
 from datetime import datetime
-import pytz # ADDED: Import pytz for timezone handling
-import django.utils.timezone as timezone # Keep this for other timezone utilities if needed
+import time
+import re
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize, sent_tokenize
+from collections import defaultdict
+import logging
+from django.utils import timezone
+import pytz # For timezone handling, pip install pytz
 
-def fetch_bbc_news_rss():
+logger = logging.getLogger(__name__)
+
+# Ensure NLTK data is downloaded (run these once in a Python shell if not already)
+# import nltk
+# nltk.download('punkt')
+# nltk.download('stopwords')
+# nltk.download('wordnet') # Often useful for more advanced text processing
+
+
+def clean_html(html_content):
     """
-    Fetches news articles from the BBC News RSS feed.
-    Parses the feed, extracts article data, and returns a list of dictionaries.
-    Includes basic error handling for network requests and parsing.
+    Cleans HTML tags from a string, leaving only plain text.
     """
-    BBC_RSS_FEED_URL = "https://feeds.bbci.co.uk/news/rss.xml"
+    if not html_content:
+        return ""
+    soup = BeautifulSoup(html_content, 'html.parser')
+    # Remove script and style elements
+    for script_or_style in soup(['script', 'style']):
+        script_or_style.decompose()
+    # Get text and replace multiple newlines/spaces with single ones
+    text = soup.get_text()
+    # Replace multiple newlines with a single space, then strip leading/trailing whitespace
+    return re.sub(r'\s+', ' ', text).strip()
+
+
+def generate_summary(text, num_sentences=10, article_title=""): # Changed default to 10 sentences
+    """
+    Generates an extractive summary of the given text based on sentence scoring.
+    Prioritizes sentences containing words from the article title.
+    """
+    if not text:
+        return "No content to summarize."
+
+    # Clean the text before summarization
+    cleaned_text = clean_html(text)
+    if not cleaned_text:
+        return "No readable content to summarize."
+
+    sentences = sent_tokenize(cleaned_text)
+    if len(sentences) <= num_sentences:
+        return cleaned_text # Return full text if it's already short enough
+
+    words = word_tokenize(cleaned_text.lower())
+    stop_words = set(stopwords.words('english'))
+    
+    # Filter out stop words and non-alphabetic tokens
+    filtered_words = [word for word in words if word.isalnum() and word not in stop_words]
+
+    # Calculate word frequencies
+    word_freq = defaultdict(int)
+    for word in filtered_words:
+        word_freq[word] += 1
+
+    # Score sentences
+    sentence_scores = defaultdict(int)
+    title_words = set(word_tokenize(article_title.lower()))
+    
+    for i, sentence in enumerate(sentences):
+        for word in word_tokenize(sentence.lower()):
+            if word in word_freq:
+                sentence_scores[i] += word_freq[word]
+            # Boost score if word is in the article title
+            if word in title_words:
+                sentence_scores[i] += 2 # Give a higher boost
+
+        # Give a slight boost to the first few sentences as they often contain key info
+        if i < 2: # Boost first 2 sentences
+            sentence_scores[i] += 1
+
+    # Sort sentences by score in descending order and select top N
+    # We keep the original index to preserve order
+    scored_sentences = sorted(sentence_scores.items(), key=lambda x: x[1], reverse=True)
+    
+    # Select the top N sentences based on score
+    # Then sort them by their original position to maintain coherence
+    top_sentences_indices = sorted([index for index, score in scored_sentences[:num_sentences]])
+    
+    # Reconstruct the summary
+    summary_sentences = [sentences[i] for i in top_sentences_indices]
+    
+    return " ".join(summary_sentences)
+
+
+def fetch_articles_from_rss(feed_url):
+    """
+    Fetches and parses articles from a given RSS feed URL.
+    Returns a list of dictionaries, each representing an article.
+    """
     articles_data = []
-
     try:
-        # Fetch the feed content with requests
-        # Adding a User-Agent is good practice to identify your scraper
-        # Adding a timeout prevents the request from hanging indefinitely
-        response = requests.get(BBC_RSS_FEED_URL, headers={'User-Agent': 'ByteNewsScraper/1.0'}, timeout=10)
-        response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
-
-        # Parse the feed content using feedparser
-        feed = feedparser.parse(response.content)
-
-        # Loop through each entry (article) in the feed
+        feed = feedparser.parse(feed_url)
         for entry in feed.entries:
-            title = entry.title
-            link = entry.link
-            # Use entry.summary or entry.description for content. Check which one exists.
-            # Provides a fallback if neither is available.
-            content = entry.get('summary', entry.get('description', 'No content available.'))
+            title = entry.title if hasattr(entry, 'title') else 'No Title'
+            link = entry.link if hasattr(entry, 'link') else None
+            
+            # Use 'content' or 'summary' for article content
+            content = ""
+            if hasattr(entry, 'content') and entry.content:
+                # content is often a list of dictionaries
+                for c in entry.content:
+                    if c.type == 'text/html' or c.type == 'text/plain':
+                        content = c.value
+                        break
+                if not content and hasattr(entry, 'summary'): # Fallback to summary if content is empty
+                    content = entry.summary
+            elif hasattr(entry, 'summary'):
+                content = entry.summary
+            
+            # Clean HTML from content
+            cleaned_content = clean_html(content)
 
-            # Parse publication date. feedparser often provides a parsed_tuple or utc_datetime.
-            # Convert to Django's timezone-aware datetime for consistency.
+            # Publication date handling
             published_date = None
             if hasattr(entry, 'published_parsed'):
-                # feedparser's published_parsed is a time.struct_time
-                # Convert it to a timezone-aware datetime object using pytz.utc
-                published_date = datetime(*entry.published_parsed[:6], tzinfo=pytz.utc) # CORRECTED: Use pytz.utc
-            elif hasattr(entry, 'published_parsed_as_datetime'): # For newer feedparser versions
-                published_date = entry.published_parsed_as_datetime.astimezone(pytz.utc) # CORRECTED: Use pytz.utc
-            elif hasattr(entry, 'published'): # Fallback to parsing string if other methods fail
                 try:
-                    # This might need more robust parsing for various date formats
-                    # For simplicity, we assume feedparser's internal parsing is usually sufficient
-                    # If this fallback is hit, it. means feedparser didn't provide a structured date
-                    # You might add more specific strptime formats here if needed.
-                    pass
-                except ValueError:
-                    published_date = None # Could not parse if string format is unexpected
+                    # Create naive datetime object
+                    naive_date = datetime(*entry.published_parsed[:6])
+                    # Make it timezone-aware using pytz.utc
+                    published_date = pytz.utc.localize(naive_date)
+                except Exception as e:
+                    logger.warning(f"Could not parse published_parsed for '{title}': {e}")
+            elif hasattr(entry, 'updated_parsed'):
+                try:
+                    # Create naive datetime object
+                    naive_date = datetime(*entry.updated_parsed[:6])
+                    # Make it timezone-aware using pytz.utc
+                    published_date = pytz.utc.localize(naive_date)
+                except Exception as e:
+                    logger.warning(f"Could not parse updated_parsed for '{title}': {e}")
+            
+            if not published_date:
+                # Fallback to current time if no date found (this is already timezone-aware)
+                published_date = timezone.now()
+                logger.warning(f"No publication date found for '{title}', using current time.")
 
-            articles_data.append({
-                'title': title,
-                'link': link,
-                'content': content,
-                'publication_date': published_date,
-                'source': 'BBC News' # Adding a source field for clarity
-            })
+            author = entry.author if hasattr(entry, 'author') else 'Unknown'
+            
+            # Extract categories/tags
+            categories = []
+            if hasattr(entry, 'tags'):
+                for tag in entry.tags:
+                    if hasattr(tag, 'term'):
+                        categories.append(tag.term)
+            elif hasattr(entry, 'category'): # Some feeds use 'category' directly
+                categories.append(entry.category)
 
-        return articles_data
+            if link: # Only add if a link exists
+                articles_data.append({
+                    'title': title,
+                    'content': cleaned_content,
+                    'publication_date': published_date,
+                    'author': author,
+                    'link': link,
+                    'categories': categories,
+                })
+            else:
+                logger.warning(f"Skipping article '{title}' due to missing link.")
 
-    except requests.exceptions.RequestException as e:
-        # Handles network-related errors (e.g., connection refused, timeout)
-        print(f"Error fetching RSS feed from BBC News: {e}")
-        return []
     except Exception as e:
-        # Catches any other unexpected errors during parsing or processing
-        print(f"An error occurred during RSS parsing: {e}")
-        return []
+        logger.error(f"Error fetching or parsing RSS feed {feed_url}: {e}", exc_info=True)
+    return articles_data
+

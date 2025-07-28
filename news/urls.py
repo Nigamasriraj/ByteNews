@@ -1,15 +1,17 @@
 # bytenews/news/urls.py
-
 from django.urls import path
-from .views import ArticleListView, ArticleDetailView # Import your views
+from . import views
 
-app_name = 'news' # Define the app namespace
+app_name = 'news' # Namespace for URLs - This is crucial!
 
 urlpatterns = [
-    # Home page - displays a list of articles (can be filtered by category or personalized)
-    path('', ArticleListView.as_view(), name='article_list'),
-    # Detail page for a specific article (uses primary key)
-    path('article/<int:pk>/', ArticleDetailView.as_view(), name='detail'),
-    # Search results page - also handled by ArticleListView, but with a 'q' parameter
-    path('search/', ArticleListView.as_view(), name='search_results'),
+    path('', views.ArticleListView.as_view(), name='article_list'),
+    path('article/<slug:slug>/', views.ArticleDetailView.as_view(), name='article_detail'),
+    # URL for generating summary
+    path('article/<slug:slug>/generate_summary/', views.generate_summary_view, name='generate_summary'),
+    # URL for submitting feedback
+    path('article/<slug:slug>/feedback/', views.submit_summary_feedback, name='submit_summary_feedback'),
+    # URL for user's reading history
+    path('history/', views.ReadingHistoryListView.as_view(), name='reading_history'),
 ]
+

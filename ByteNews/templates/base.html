@@ -6,169 +6,455 @@
     <title>{% block title %}ByteNews{% endblock %}</title>
     <!-- Bootstrap CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons CDN (needed for helpful/not helpful icons) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        /* Custom CSS for a dark theme and consistent styling */
-        body {
-            background-color: #2c2c2c; /* Dark background */
-            color: #f0f0f0; /* Light text */
-            font-family: 'Inter', sans-serif; /* Using Inter font */
-        }
-        .navbar {
-            background-color: #3a3a3a; /* Darker navbar */
-            border-bottom: 1px solid #555; /* Subtle separator */
-            border-radius: 0 0 10px 10px; /* Rounded bottom corners */
-        }
-        .navbar-brand, .nav-link, .navbar-text {
-            color: #f0f0f0 !important; /* Ensure light text for navigation */
-        }
-        .form-control {
-            background-color: #4a4a4a; /* Darker input background */
-            color: #f0f0f0; /* Light input text */
-            border: 1px solid #666; /* Input border */
-            border-radius: 5px; /* Rounded input corners */
-        }
-        .form-control:focus {
-            background-color: #5a5a5a; /* Slightly lighter on focus */
-            color: #f0f0f0;
-            border-color: #8ab4f8; /* Highlight color on focus */
-            box-shadow: 0 0 0 0.25rem rgba(138, 180, 248, 0.25); /* Focus glow */
-        }
-        .btn-primary {
-            background-color: #007bff; /* Standard blue button */
-            border-color: #007bff;
-            border-radius: 5px; /* Rounded button corners */
-        }
-        .btn-outline-success { /* For search button */
-            color: #28a745;
-            border-color: #28a745;
-            border-radius: 5px;
-        }
-        .btn-outline-success:hover {
-            background-color: #28a745;
-            color: white;
-        }
-        .alert-info { /* For recommendations and messages */
-            background-color: #4a4a4a;
-            border-color: #666;
-            color: #f0f0f0;
-            border-radius: 8px; /* Rounded alert corners */
-        }
-        .card { /* For article cards */
-            background-color: #3a3a3a;
-            border: 1px solid #555;
-            color: #f0f0f0;
-            border-radius: 8px; /* Rounded card corners */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-        }
-        a {
-            color: #8ab4f8; /* A light blue for links, matching the desired output */
-            text-decoration: none;
-        }
-        a:hover {
-            color: #a7c7f8;
-            text-decoration: underline;
-        }
-        .pagination .page-link {
-            background-color: #3a3a3a;
-            color: #8ab4f8;
-            border: 1px solid #555;
-            border-radius: 5px; /* Rounded pagination links */
-            margin: 0 2px; /* Small gap between links */
-        }
-        .pagination .page-item.active .page-link {
-            background-color: #007bff; /* Active page background */
-            border-color: #007bff;
-            color: white;
-        }
-        .pagination .page-link:hover {
-            background-color: #555;
-        }
-        /* Specific styling for checkbox labels */
-        .form-check-label {
-            color: #f0f0f0; /* Ensure checkbox labels are light */
-        }
-        .form-check-input[type="checkbox"] {
-            background-color: #4a4a4a;
-            border-color: #666;
-        }
-        .form-check-input[type="checkbox"]:checked {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        /* Styling for the username display */
-        .nav-item .navbar-text {
-            padding: 0.5rem 1rem; /* Add padding to make it look like a nav item */
+        /* White Theme color palette */
+        :root {
+            --gn-bg-light: #f8f9fa; /* Main background */
+            --gn-card-bg: #ffffff; /* Card background */
+            --gn-text-dark: #202124; /* Main text color */
+            --gn-text-muted: #5f6368; /* Muted text like date/author */
+            --gn-blue-accent: #1a73e8; /* Primary link/button blue */
+            --gn-blue-hover: #1764cc; /* Blue hover */
+            --gn-border: #dadce0; /* Light grey border for subtle definition */
+            --gn-input-bg: #f0f2f5; /* Input field background */
+            --gn-button-blue: #1a73e8; /* Blue button background */
+            --gn-button-blue-hover: #1764cc; /* Blue button hover */
+            --gn-alert-bg: #e8f0fe; /* Light blue alert background */
+            --gn-alert-border: #a8d1ff; /* Light blue alert border */
+            --gn-danger-text: #d93025; /* Reddish color for error messages */
+            --gn-danger-bg: #fce8e6; /* Light red background for danger alerts */
+            --gn-danger-border: #fccac7; /* Light red border for danger alerts */
+            --gn-success-text: #188038; /* Greenish color for success messages */
+            --gn-success-bg: #e6f4ea; /* Light green background for success alerts */
+            --gn-success-border: #a8daaa; /* Light green border for success alerts */
         }
 
-        /* Styling for author and category text in article cards */
-        .card-text.text-muted, .card-footer.text-muted {
-            color: #cccccc !important; /* Lighter grey for better contrast */
+        body {
+            background-color: var(--gn-bg-light);
+            color: var(--gn-text-dark);
+            font-family: 'Google Sans', 'Inter', sans-serif;
+            line-height: 1.6; /* Improved readability for body text */
         }
-        /* Styling for category tags */
-        .card-footer .badge {
-            background-color: #007bff !important; /* Ensure badges are visible */
-            color: white !important;
+
+        .navbar {
+            background-color: var(--gn-card-bg);
+            border-bottom: none;
+            border-radius: 0;
+            padding: 10px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Softer shadow for navbar */
         }
-        /* UPDATED: Increase search bar width */
-        .navbar .form-control.me-2 {
-            width: 300px; /* Increased width, adjust as needed */
-            max-width: 100%; /* Ensure responsiveness */
+
+        .navbar-brand {
+            color: var(--gn-text-dark) !important;
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-right: 2rem;
         }
-        /* Styling for clickable username */
-        .nav-item .user-dropdown-toggle {
-            color: #f0f0f0 !important;
-            cursor: pointer;
+
+        /* Search Bar Styling */
+        .navbar .search-form-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .navbar .form-control.search-input {
+            background-color: var(--gn-input-bg);
+            border: none;
+            color: var(--gn-text-dark);
+            border-radius: 28px;
+            padding: 0.85rem 1.5rem 0.85rem 3.25rem;
+            width: 100%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); /* Softer inner shadow */
+        }
+        .navbar .form-control.search-input::placeholder {
+            color: var(--gn-text-muted);
+            opacity: 1;
+        }
+        .navbar .form-control.search-input:focus {
+            background-color: var(--gn-input-bg);
+            border-color: var(--gn-blue-accent);
+            box-shadow: 0 0 0 0.3rem rgba(26, 115, 232, 0.3);
+        }
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gn-text-muted);
+            pointer-events: none;
+            width: 22px;
+            height: 22px;
+        }
+        .navbar .btn-outline-success {
+            display: none;
+        }
+
+        /* Navigation Links */
+        .nav-link, .dropdown-item {
+            color: var(--gn-text-dark) !important;
+            font-weight: 500;
             padding: 0.5rem 1rem;
-            display: block; /* Make the whole area clickable */
+            border-radius: 8px;
         }
-        .nav-item .user-dropdown-toggle:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
+        .nav-link:hover, .dropdown-item:hover {
+            background-color: rgba(0,0,0,0.05); /* Lighter hover effect */
+            color: var(--gn-text-dark) !important;
         }
+        .nav-item.dropdown .nav-link.user-dropdown-toggle {
+            padding-right: 0.5rem;
+        }
+
+        /* Alerts/Messages */
+        .alert-info {
+            background-color: var(--gn-alert-bg);
+            border-color: var(--gn-alert-border);
+            color: var(--gn-text-dark);
+            border-radius: 8px;
+        }
+        .alert-danger {
+            background-color: var(--gn-danger-bg);
+            border-color: var(--gn-danger-border);
+            color: var(--gn-danger-text);
+            border-radius: 8px;
+        }
+        .alert-success {
+            background-color: var(--gn-success-bg);
+            border-color: var(--gn-success-border);
+            color: var(--gn-success-text);
+            border-radius: 8px;
+        }
+
+
+        /* Article Cards and General Cards */
+        .card {
+            background-color: var(--gn-card-bg);
+            border: none;
+            border-radius: 16px; /* Slightly less rounded for a cleaner look */
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1); /* Softer shadow for cards */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            padding: 1.2rem 1.8rem; /* Adjusted padding for better internal spacing */
+        }
+        .card:hover {
+            transform: translateY(-8px); /* Lift card more on hover */
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15); /* Softer shadow on hover */
+        }
+        .card-title a {
+            color: var(--gn-blue-accent);
+            font-weight: 500;
+            font-size: 1.25rem; /* Slightly larger title for readability */
+        }
+        /* Explicitly set color for the entire .article-detail-meta paragraph to dark */
+        .article-detail-meta {
+            color: var(--gn-text-muted) !important; /* Muted for faded effect */
+            font-size: 0.95rem; /* Slightly larger font size */
+        }
+        .article-detail-meta .badge.category-tag {
+            color: var(--gn-text-muted) !important; /* Changed to muted for consistency */
+            font-size: 0.95rem; /* Set font size to match .article-detail-meta */
+            /* Removed styling that made it look like a box */
+            padding: 0; /* Remove padding */
+            background-color: transparent; /* Ensure background is transparent */
+            border: none; /* Remove border */
+            border-radius: 0; /* Remove border-radius */
+            vertical-align: baseline; /* Align vertically with text */
+            margin-right: 0; /* Remove margin between badges */
+        }
+
+
+        .card-footer {
+            background-color: transparent;
+            border-top: none !important;
+            color: var(--gn-text-muted) !important;
+            font-size: 0.875rem;
+            padding: 0;
+        }
+        .card-footer a {
+            color: var(--gn-text-muted) !important;
+        }
+        .card-footer a:hover {
+            color: var(--gn-text-dark) !important;
+        }
+
+        /* Primary and Secondary Buttons */
+        .btn-primary, .btn-secondary {
+            border-radius: 20px; /* Consistent rounded buttons */
+            padding: 0.6rem 1.2rem; /* Adjusted padding for a medium size */
+            font-size: 0.9rem; /* Consistent font size */
+            font-weight: 500;
+            text-decoration: none !important;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease-out;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover, .btn-secondary:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-1px); /* Slight lift on hover */
+        }
+        .btn-primary {
+            background-color: var(--gn-button-blue);
+            border-color: var(--gn-button-blue);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--gn-button-blue-hover);
+            border-color: var(--gn-button-blue-hover);
+        }
+        .btn-secondary {
+            background-color: var(--gn-input-bg);
+            border-color: var(--gn-border);
+            color: var(--gn-text-dark);
+        }
+        .btn-secondary:hover {
+            background-color: var(--gn-border);
+            border-color: var(--gn-border);
+            color: var(--gn-text-dark);
+        }
+
+        /* Feedback Buttons (Yes/No) - Smaller size */
+        .btn-sm.btn-success, .btn-sm.btn-danger {
+            border-radius: 16px; /* Slightly less rounded for small buttons */
+            padding: 0.3rem 0.8rem !important; /* Adjusted padding */
+            font-size: 0.75rem; /* Smaller font size */
+            font-weight: 500;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08); /* Subtle shadow */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-sm.btn-success:hover {
+            background-color: #15a043 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+        }
+        .btn-sm.btn-danger:hover {
+            background-color: #c02a1e !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+        }
+        .btn-sm.btn-success {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+        }
+        .btn-sm.btn-danger {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+        }
+        .btn-sm .bi {
+            margin-right: 0.25rem; /* Smaller space for small buttons */
+            font-size: 0.8rem;
+        }
+
+
+        /* Pagination */
+        .pagination .page-link {
+            background-color: var(--gn-card-bg);
+            color: var(--gn-text-dark);
+            border: none;
+            border-radius: 8px;
+            margin: 0 3px; /* Slightly less margin */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        .pagination .page-item.active .page-link {
+            background-color: var(--gn-blue-accent);
+            border-color: var(--gn-blue-accent);
+            color: white;
+            box-shadow: 0 2px 4px rgba(26, 115, 232, 0.2);
+        }
+        .pagination .page-link:hover {
+            background-color: rgba(0,0,0,0.05); /* Lighter hover */
+            color: var(--gn-text-dark);
+        }
+
+        /* Dropdown Menu */
         .dropdown-menu {
-            background-color: #3a3a3a; /* Dark background for dropdown */
-            border: 1px solid #555;
+            background-color: var(--gn-card-bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
         .dropdown-item {
-            color: #f0f0f0; /* Light text for dropdown items */
+            color: var(--gn-text-dark) !important;
         }
         .dropdown-item:hover {
-            background-color: #4a4a4a; /* Slightly lighter on hover */
-            color: #f0f0f0;
+            background-color: rgba(0,0,0,0.05); /* Lighter hover */
+        }
+        .dropdown-divider {
+            border-top: 1px solid var(--gn-border);
+        }
+
+        /* Form elements */
+        .form-check-label, .form-label, .form-text {
+            color: var(--gn-text-dark) !important;
+        }
+        .form-check-input[type="checkbox"] {
+            background-color: var(--gn-input-bg);
+            border-color: var(--gn-border);
+        }
+        .form-check-input[type="checkbox"]:checked {
+            background-color: var(--gn-blue-accent);
+            border-color: var(--gn-blue-accent);
+        }
+        ul.errorlist {
+            list-style: none;
+            padding: 0;
+            margin-top: 5px;
+            color: var(--gn-danger-text) !important;
+            font-size: 0.875rem;
+        }
+        ul.errorlist li {
+            margin-bottom: 2px;
+            color: var(--gn-danger-text) !important;
+        }
+        .invalid-feedback {
+            color: var(--gn-danger-text) !important;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .button-container-centered {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .button-container-centered .btn {
+            width: auto;
+            min-width: 150px;
+            max-width: 250px;
+        }
+        .form-control {
+            background-color: var(--gn-input-bg) !important;
+            color: var(--gn-text-dark) !important;
+            border: none !important;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); /* Softer inner shadow */
+        }
+        .form-control::placeholder {
+            color: var(--gn-text-muted) !important;
+        }
+
+        /* Article card specific styling */
+        .article-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            margin-bottom: 2.5rem; /* Adjusted vertical space between rows */
+            max-width: 420px; /* Slightly increased max-width for cards */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .article-card .card-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 180px; /* Set a minimum height for consistent card body */
+            justify-content: space-between; /* Distribute space for title, text, button */
+        }
+
+        .article-card .card-title {
+            min-height: 3em; /* Ensure title section has consistent height for 2-3 lines */
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Limit title to 2 lines */
+            -webkit-box-orient: vertical;
+            text-overflow: ellipsis;
+        }
+
+        .article-card p {
+            flex-grow: 1;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* Limit description to 3 lines */
+            -webkit-box-orient: vertical;
+            text-overflow: ellipsis;
+            font-size: 0.95rem;
+        }
+
+        .article-card .btn {
+            margin-top: auto; /* Push button to the bottom of the card body */
+        }
+
+        /* Summary box on article detail page */
+        .card.summary-card {
+            background-color: var(--gn-input-bg) !important;
+            color: var(--gn-text-dark) !important;
+            border: none;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+        .card.summary-card .card-title {
+            color: var(--gn-text-dark) !important;
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+        .card.summary-card .card-text {
+            font-size: 1rem;
+        }
+
+        /* Column and Row adjustments for spacing */
+        .row > [class*="col-"] {
+            padding-left: 1.2rem;
+            padding-right: 1.2rem;
+            padding-bottom: 2rem;
+        }
+        .row {
+            margin-left: -1.2rem;
+            margin-right: -1.2rem;
+        }
+
+        /* Main content area padding */
+        .container.mt-4 {
+            padding-top: 30px;
+            padding-bottom: 30px;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'news:article_list' %}">ByteNews</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                {# Search bar placement in the navbar - Centered and larger #}
+                <form class="d-flex search-form-container" action="{% url 'news:article_list' %}" method="get">
+                    <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
+                    <input class="form-control search-input" type="search" placeholder="Search for topics, locations & sources" aria-label="Search" name="q" value="{{ request.GET.q|default_if_none:'' }}">
+                </form>
+
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                    {# Home link #}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'news:article_list' %}">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'news:search_results' %}">Search</a>
+
+                    {# NEW: Preferences Dropdown with Categories #}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarPreferencesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Preferences
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarPreferencesDropdown">
+                            <li><h6 class="dropdown-header">Filter by Category</h6></li>
+                            {% for category in categories %}
+                                <li><a class="dropdown-item" href="{% url 'news:article_list' %}?category={{ category.name }}">{{ category.name }}</a></li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'users:preferences' %}">Manage My Preferences</a></li>
+                        </ul>
                     </li>
-                </ul>
-                {# Search bar placement in the navbar #}
-                <form class="d-flex" action="{% url 'news:search_results' %}" method="get">
-                    <input class="form-control me-2" type="search" placeholder="Search topics, sources..." aria-label="Search" name="q" value="{{ request.GET.q|default_if_none:'' }}">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
                     {% if user.is_authenticated %}
+                        {# New "User History" link #}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'news:reading_history' %}">User History</a>
+                        </li>
                         {# User dropdown for logout and preferences #}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle user-dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle user-dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 {{ user.username }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'users:preferences' %}">Preferences</a></li>
-                                <li><hr class="dropdown-divider"></li>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
                                 <li>
                                     <form action="{% url 'logout' %}" method="post" class="d-inline">
                                         {% csrf_token %}

@@ -1,4 +1,5 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {# Extends your base.html for consistent styling #}
+{% load widget_tweaks %} {# Load widget_tweaks to use the add_class filter #}
 
 {% block title %}Sign In{% endblock %}
 
@@ -6,25 +7,40 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card p-4">
-                <h2 class="mb-4">Sign In</h2>
+            <div class="card p-4"> {# Card for a nice bordered box with padding #}
+                <h2 class="mb-4 text-center">Sign In</h2>
                 <form method="post">
                     {% csrf_token %}
+                    {# Display non-field errors (e.g., "Invalid credentials") #}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
                     {% for field in form %}
                         <div class="mb-3">
+                            {# Labels will now be styled by base.html to be light text #}
                             <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                            {{ field }}
+                            {# Apply form-control class to input fields using widget_tweaks #}
+                            {{ field|add_class:"form-control" }}
                             {% if field.help_text %}
-                                <div class="form-text">{{ field.help_text }}</div>
+                                <div class="form-text">{{ field.help_text }}</div> {# Styled by base.html #}
                             {% endif %}
                             {% for error in field.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                {# Errors will now be visible due to base.html CSS #}
+                                <div class="invalid-feedback d-block">{{ error }}</div> {# Display errors #}
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <button type="submit" class="btn btn-primary">Sign In</button>
+                    {# NEW: Wrapper div for the login button to center and reduce its width #}
+                    <div class="button-container-centered">
+                        <button type="submit" class="btn btn-primary mt-3">Sign In</button>
+                    </div>
                 </form>
-                <p class="mt-3">Don't have an account? <a href="{% url 'register' %}">Sign Up</a></p>
+                <p class="mt-3 text-center">Don't have an account? <a href="{% url 'register' %}">Sign Up</a></p>
             </div>
         </div>
     </div>
