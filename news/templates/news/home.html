@@ -11,6 +11,7 @@
                 <h5>{{ article.title }}</h5>
                 {# FIX: Ensure summary is always displayed, falling back to truncated content #}
                 <p>{{ article.summary|default_if_none:article.content|truncatechars:150 }}</p>
+                {# Ensure btn-sm class is applied #}
                 <a href="{% url 'news:article_detail' slug=article.slug %}" class="btn btn-sm btn-primary mt-2">Read More</a>
             </div>
         </div>

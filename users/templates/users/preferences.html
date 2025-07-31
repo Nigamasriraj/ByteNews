@@ -1,34 +1,50 @@
-{# bytenews/users/templates/users/preferences.html #}
 {% extends 'base.html' %}
-{# REMOVED: {% load crispy_forms_tags %} #}
-{# {% load widget_tweaks %} is optional here as we are manually rendering checkboxes, but harmless #}
+{% load widget_tweaks %}
 
-{% block title %}Your Preferences{% endblock %}
+{% block title %}My Preferences - ByteNews{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-3">Your News Preferences</h2>
-    <p class="mb-4">Select the categories you are most interested in:</p>
-    <form method="post">
-        {% csrf_token %}
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card p-4">
+                <h2 class="mb-4 text-center">Manage Your Preferences</h2>
+                <p class="text-center text-muted mb-4">Select the news categories you're most interested in. This will help us personalize your feed.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {# Display non-field errors #}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
 
-        {# Manual rendering for checkboxes to apply Bootstrap's form-check classes #}
-        <div class="mb-3">
-            <label class="form-label"><strong>Preferred Categories:</strong></label>
-            {% for checkbox in form.preferred_categories %}
-                <div class="form-check">
-                    {{ checkbox.tag }} {# Renders the <input type="checkbox"> tag #}
-                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
-                        {{ checkbox.choice_label }} {# Renders the category name #}
-                    </label>
-                </div>
-            {% endfor %}
-            {% for error in form.preferred_categories.errors %}
-                <div class="invalid-feedback d-block">{{ error }}</div>
-            {% endfor %}
+                    {# Specifically render the preferred_categories field as checkboxes #}
+                    <div class="mb-3">
+                        <label class="form-label d-block mb-2">Preferred Categories:</label>
+                        {% for checkbox in form.preferred_categories %}
+                            <div class="form-check">
+                                {{ checkbox.tag }} {# Renders the input type="checkbox" #}
+                                <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                    {{ checkbox.choice_label }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                        {% for error in form.preferred_categories.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="button-container-centered">
+                        <button type="submit" class="btn btn-primary mt-3">Save Preferences</button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <button type="submit" class="btn btn-primary mt-3">Save Preferences</button>
-    </form>
+    </div>
 </div>
 {% endblock %}

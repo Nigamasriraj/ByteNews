@@ -126,6 +126,7 @@ body {
     max-height: 350px; /* Adjusted max-height */
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* Hide overflowing content if any */
 }
 
 .card-body {
@@ -133,7 +134,7 @@ body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    justify-content: space-between; /* Distribute content vertically */
+    justify-content: flex-start; /* Align content to start, flex-grow on text will push button */
 }
 
 .card-title {
@@ -147,6 +148,30 @@ body {
     -webkit-line-clamp: 2; /* Limit title to 2 lines */
     -webkit-box-orient: vertical;
     flex-shrink: 0; /* Prevent title from shrinking */
+    min-height: 2.6em; /* Ensure consistent height for 2 lines */
+}
+
+.card-subtitle {
+    color: #80868b !important;
+    font-size: 0.8em;
+    margin-bottom: 10px;
+    flex-shrink: 0; /* Prevent subtitle from shrinking */
+    min-height: 1.2em; /* Ensure consistent height for subtitle */
+}
+
+/* Category Tag - Adjusted for desired look */
+.category-tag {
+    background-color: #303134;
+    color: #ffffff; /* Changed to white for brightness */
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    display: inline-block; /* Make it inline-block */
+    flex-shrink: 0;
+    margin-top: 10px; /* Space above the tag */
+    margin-bottom: 10px; /* Space below the tag */
+    white-space: nowrap; /* Prevent text wrapping inside the tag */
+    align-self: flex-start; /* Ensure it aligns to the left within the flex column */
 }
 
 .card-text {
@@ -159,26 +184,9 @@ body {
     display: -webkit-box;
     -webkit-line-clamp: 4; /* Limit content to 4 lines */
     -webkit-box-orient: vertical;
-    margin-bottom: 10px; /* Add some margin below content */
+    margin-bottom: 15px; /* Increased margin below content to push button down */
 }
 
-.card-subtitle {
-    color: #80868b !important;
-    font-size: 0.8em;
-    margin-bottom: 10px;
-    flex-shrink: 0; /* Prevent subtitle from shrinking */
-}
-
-.category-tag {
-    background-color: #303134;
-    color: #8ab4f8;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 12px;
-    margin-top: auto; /* Push to bottom */
-    display: inline-block;
-    flex-shrink: 0; /* Prevent tag from shrinking */
-}
 
 .read-more-button {
     background-color: #8ab4f8;
@@ -187,15 +195,15 @@ body {
     border-radius: 5px;
     text-decoration: none;
     display: inline-block;
-    margin-top: 15px;
     flex-shrink: 0; /* Prevent button from shrinking */
+    align-self: flex-start; /* Align button to the left */
 }
 
 .read-more-button:hover {
     background-color: #6a9de9;
 }
 
-/* Preferences Page Container */
+/* Preferences Page Container - now also used for navbar dropdown styles */
 .preferences-container {
     background-color: #202124;
     padding: 30px;
@@ -216,7 +224,58 @@ body {
     color: #bdc1c6;
 }
 
-/* Preferences Dropdown on Preferences Page */
+/* Preferences Dropdown in Navbar (re-added) */
+.preferences-nav-dropdown {
+    position: relative;
+    display: inline-block;
+    margin-left: 15px; /* Adjust spacing from Home link */
+}
+
+.preferences-nav-dropdown .btn {
+    color: #e0e0e0 !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 16px;
+    padding: 0; /* Remove default button padding */
+}
+
+.preferences-nav-dropdown .btn:hover {
+    text-decoration: underline;
+}
+
+.preferences-nav-dropdown .dropdown-menu {
+    background-color: #303134;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    padding: 10px 0;
+    max-height: 300px; /* Adjust as needed */
+    overflow-y: auto;
+    min-width: 200px; /* Ensure enough width for checkboxes */
+}
+
+.preferences-nav-dropdown .dropdown-item-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px; /* Spacing for each checkbox item */
+    color: #e0e0e0;
+    cursor: pointer;
+    white-space: nowrap; /* Prevent wrapping */
+    font-size: 0.95em; /* Slightly smaller font for neatness */
+}
+
+.preferences-nav-dropdown .dropdown-item-checkbox:hover {
+    background-color: #404144;
+}
+
+.preferences-nav-dropdown .dropdown-item-checkbox input[type="checkbox"] {
+    margin-right: 10px;
+    /* Custom checkbox styling if needed */
+    transform: scale(1.1); /* Slightly larger checkbox */
+}
+
+
+/* Preferences Dropdown on Preferences Page (specific styles) */
 .preferences-page-dropdown-container {
     position: relative;
     display: block; /* Changed to block for full width */
@@ -281,6 +340,7 @@ body {
     display: block;
 }
 
+
 /* Auth container and form styling */
 .auth-container {
     background-color: #202124;
@@ -290,12 +350,19 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .auth-container h2 {
     color: #e0e0e0;
     margin-bottom: 30px;
     font-size: 28px;
+}
+
+.auth-container form {
+    width: 100%;
 }
 
 .auth-container label {
@@ -309,12 +376,13 @@ body {
 .auth-container .form-control {
     width: 100%;
     padding: 12px;
-    border: 1px solid #404144; /* Darker border */
+    border: 1px solid #404144;
     border-radius: 6px;
-    background-color: #303134; /* Darker background */
+    background-color: #202124;
     color: #e0e0e0;
     font-size: 16px;
     box-sizing: border-box;
+    margin-bottom: 15px; /* Added margin-bottom directly to form-control */
 }
 
 .auth-container .form-control:focus {
@@ -323,21 +391,30 @@ body {
     box-shadow: 0 0 0 3px rgba(138, 180, 248, 0.3);
 }
 
+/* Removed padding-bottom and border-bottom from form-field-wrapper for cleaner spacing */
 .auth-container .form-field-wrapper {
-    margin-bottom: 15px;
+    margin-bottom: 15px; /* Consistent margin between wrappers */
+    width: 100%;
     text-align: left;
 }
 
+/* Adjusted margin for the last form field wrapper */
+.auth-container .form-field-wrapper:last-of-type {
+    margin-bottom: 20px; /* Space before the submit button/link */
+}
+
+
 /* Error message styling */
 .text-danger {
-    color: #ff6b6b !important; /* Ensure a clear red for errors */
+    color: #ff6b6b !important;
     font-size: 0.85em;
-    margin-top: 5px;
-    display: block; /* Make sure it takes its own line */
+    margin-top: -10px; /* Adjusted to pull error message closer to input */
+    margin-bottom: 10px; /* Space below error message */
+    display: block;
 }
 
 .alert-danger {
-    background-color: #3d0000; /* Darker red background for alerts */
+    background-color: #3d0000;
     color: #ff6b6b;
     border-color: #6a0000;
     padding: 10px 15px;

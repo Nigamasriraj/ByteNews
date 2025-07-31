@@ -1,0 +1,197 @@
+/* static/css/dark_theme.css */
+/* This is your new global stylesheet for the dark theme. */
+
+/* 1. Global Style Variables & Body Styling */
+:root {
+    --primary-color: #00BFFF; /* Electric Blue */
+    --primary-color-hover: #0099CC;
+    --dark-bg: #121212;
+    --surface-color: rgba(38, 38, 38, 0.5); /* Semi-transparent surface for cards */
+    --glass-border-color: rgba(255, 255, 255, 0.1);
+    --text-color: #EAEAEA;
+    --text-muted-color: #A0A0A0;
+    --input-bg-color: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    background-color: var(--dark-bg) !important;
+    color: var(--text-color) !important;
+    font-family: 'Inter', sans-serif;
+}
+
+/* General heading styles */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color);
+}
+
+/* NEW: Page Title styling */
+.page-title {
+    font-size: 2.25rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--glass-border-color);
+}
+
+
+/* 2. Navbar Styling */
+.navbar {
+    background: var(--surface-color);
+    border-bottom: 1px solid var(--glass-border-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.navbar-brand, .nav-link, .dropdown-item {
+    color: var(--text-color) !important;
+}
+
+.navbar-brand:hover, .nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* UPDATED: Search Bar Styling */
+.search-form-container {
+    position: relative;
+    flex-grow: 1;
+    max-width: 600px;
+    margin: 0 auto;
+}
+.search-form-container .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted-color);
+    pointer-events: none;
+}
+.search-form-container .form-control {
+    background-color: var(--input-bg-color) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--glass-border-color) !important;
+    border-radius: 28px;
+    box-shadow: none !important;
+    padding-left: 3rem; /* Make space for the icon */
+}
+.search-form-container .form-control::placeholder {
+    color: var(--text-muted-color);
+}
+
+
+/* Dropdown Menu */
+.dropdown-menu {
+    background-color: #1e1e1e;
+    border: 1px solid var(--glass-border-color);
+    border-radius: 12px;
+}
+.dropdown-item:hover {
+    background-color: var(--primary-color);
+}
+.dropdown-divider {
+    border-top: 1px solid var(--glass-border-color);
+}
+
+/* 3. Homepage Article Card Styling */
+.article-card {
+    background: var(--surface-color);
+    border: 1px solid var(--glass-border-color);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.article-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 191, 255, 0.1);
+}
+.article-card .card-title a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+.article-card .card-title a:hover {
+    color: var(--primary-color);
+}
+.article-card .card-text {
+    color: var(--text-muted-color);
+}
+.article-card .card-footer {
+    background-color: transparent;
+    border-top: 1px solid var(--glass-border-color);
+}
+
+/* 4. General Component Styling */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #FFFFFF;
+    font-weight: bold;
+}
+.btn-primary:hover {
+    background-color: var(--primary-color-hover);
+    border-color: var(--primary-color-hover);
+    color: #FFFFFF;
+}
+
+/* Pagination */
+.pagination .page-link {
+    background-color: var(--surface-color);
+    border: 1px solid var(--glass-border-color);
+    color: var(--text-color);
+    margin: 0 4px;
+    border-radius: 8px;
+}
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #FFFFFF;
+    font-weight: bold;
+}
+.pagination .page-link:hover {
+    background-color: var(--primary-color-hover);
+    color: #FFFFFF;
+}
+.pagination .page-item.disabled .page-link {
+    background-color: transparent;
+    border-color: var(--glass-border-color);
+    color: var(--text-muted-color);
+}
+
+/* Alerts */
+.alert {
+    border-radius: 12px;
+    border: 1px solid;
+}
+.alert-info {
+    background-color: rgba(0, 191, 255, 0.1);
+    border-color: rgba(0, 191, 255, 0.3);
+    color: var(--text-color);
+}
+
+/* 5. Article Detail Page Styles (from before) */
+.article-container { display: flex; flex-direction: column; gap: 2rem; padding: 2rem 1rem; max-width: 1400px; margin: auto; }
+@media (min-width: 992px) { .article-container { flex-direction: row; padding: 2rem; } }
+.article-content { flex: 3; background: none; }
+.article-content h1 { font-size: 2.5rem; font-weight: bold; line-height: 1.2; margin-bottom: 0.5rem; color: var(--text-color); }
+.article-meta { color: var(--text-muted-color); margin-bottom: 1.5rem; }
+.article-body { font-size: 1.1rem; line-height: 1.8; color: var(--text-color); }
+.ai-assistant-panel { flex: 1; position: sticky; top: 2rem; height: fit-content; padding: 1.5rem; background: var(--surface-color); border: 1px solid var(--glass-border-color); border-radius: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.ai-assistant-panel h3 { margin-top: 0; margin-bottom: 1rem; color: var(--text-color); }
+.summary-controls, .feedback-controls { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.summary-controls button, .feedback-controls button { flex-grow: 1; padding: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.2); background-color: rgba(255, 255, 255, 0.1); color: var(--text-color); border-radius: 6px; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; }
+.summary-controls button.active, .summary-controls button:hover, .feedback-controls button:hover { background-color: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+#summary-container { margin-top: 1rem; color: var(--text-muted-color); font-size: 0.95rem; max-height: 400px; overflow-y: auto; }
+#summary-container.loading { text-align: center; }
+#feedback-message { font-size: 0.9rem; color: var(--primary-color); margin-top: 1rem; text-align: center; }

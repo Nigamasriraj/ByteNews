@@ -5,135 +5,152 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card p-4 mb-4">
-                <h1 class="mb-3">{{ article.title }}</h1>
-                <p class="article-detail-meta text-muted">
-                    By {{ article.author|default:"Unknown" }} on {{ article.publication_date|date:"F d, Y" }}
-                    {% if article.categories.exists %}
-                        | Categories:
-                        {% for category in article.categories.all %}
-                            <span class="badge category-tag">{{ category.name }}</span>{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                </p>
-                <hr>
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card p-4 mb-4">
 
-                {# Main Article Content #}
-                <p>{{ article.content|linebreaksbr }}</p>
+        <h1 class="mb-3">{{ article.title }}</h1>
+        <p class="article-detail-meta text-muted">
+          By {{ article.author|default:"Unknown" }}
+          on {{ article.publication_date|date:"F d, Y" }}
 
-                {# Summary Section - Visibility controlled by JS #}
-                <div id="articleSummarySection" class="card bg-light mt-4 mb-3" style="display: none;">
-                    <div class="card-body">
-                        <h5 class="card-title">Article Summary</h5>
-                        {# Summary content will be populated by JS or directly from Django context #}
-                        <p class="card-text" id="summaryContent">{{ article.summary|default_if_none:"" }}</p>
-                        {% if user.is_authenticated %}
-                            <div class="d-flex align-items-center mt-3">
-                                <small class="text-muted me-2">Was this summary helpful?</small>
-                                {# Helpful button (Task 4) #}
-                                <form method="post" action="{% url 'news:submit_summary_feedback' slug=article.slug %}" class="d-inline-block me-2">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="is_helpful" value="true">
-                                    <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-hand-thumbs-up"></i> Yes</button>
-                                </form>
-                                {# Not Helpful button (Task 4) #}
-                                <form method="post" action="{% url 'news:submit_summary_feedback' slug=article.slug %}" class="d-inline-block">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="is_helpful" value="false">
-                                    <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-hand-thumbs-down"></i> No</button>
-                                </form>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
+          {% if article.categories.exists %}
+            | Categories:
+            {% for category in article.categories.all|slice:":5" %}
+              {{ category.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            {% if article.categories.count > 5 %}
+              and {{ article.categories.count|add:"-5" }} more
+            {% endif %}
+          {% endif %}
+        </p>
 
-                {# Buttons container for alignment #}
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    {# Back to Articles button - Left aligned, blue, and small #}
-                    <a href="{% url 'news:article_list' %}" class="btn btn-primary btn-sm">Back to Articles</a>
+        <hr>
 
-                    {# Generate Summary Button and Length Input - Right aligned #}
-                    {% if user.is_authenticated %}
-                        <div class="d-flex align-items-center">
-                            <label for="summaryLength" class="form-label mb-0 me-2 text-muted">Lines:</label>
-                            <input type="number" id="summaryLength" class="form-control form-control-sm me-2" value="10" min="1" max="50" style="width: 70px;">
-                            <button id="generateSummaryBtn" class="btn btn-primary btn-sm" data-slug="{{ article.slug }}">
-                                Generate/Regenerate Summary
-                            </button>
-                        </div>
-                    {% endif %}
-                </div>
+        {# Main Article Content #}
+        <p>{{ article.content|linebreaksbr }}</p>
 
-                <div id="summaryLoading" class="text-center mt-3 mb-4" style="display: none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading summary...</span>
-                    </div>
-                    <p class="text-muted mt-2">Generating summary...</p>
-                </div>
+        {# Summary Section – hidden initially, shown after JS generation or if existing summary #}
+        <div id="articleSummarySection"
+             class="card bg-light mt-4 mb-3"
+             style="display: none;"> {# Initially hide it #}
+          <div class="card-body">
+            <h5 class="card-title">Article Summary</h5>
+            <p class="card-text" id="summaryContent"></p>
 
-            </div>
+            {% if user.is_authenticated %}
+              <div class="d-flex align-items-center mt-3">
+                <small class="text-muted me-2">Was this summary helpful?</small>
+
+                <form method="post"
+                      action="{% url 'news:submit_summary_feedback' slug=article.slug %}"
+                      class="d-inline-block me-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="is_helpful" value="true">
+                  <button type="submit" class="btn btn-sm btn-success">
+                    <i class="bi bi-hand-thumbs-up"></i> Yes
+                  </button>
+                </form>
+
+                <form method="post"
+                      action="{% url 'news:submit_summary_feedback' slug=article.slug %}"
+                      class="d-inline-block">
+                  {% csrf_token %}
+                  <input type="hidden" name="is_helpful" value="false">
+                  <button type="submit" class="btn btn-sm btn-danger">
+                    <i class="bi bi-hand-thumbs-down"></i> No
+                  </button>
+                </form>
+              </div>
+            {% endif %}
+          </div>
         </div>
+
+        {# Buttons Container #}
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <a href="{% url 'news:article_list' %}" class="btn btn-primary btn-sm"> {# CORRECTED LINE #}
+            Back to Articles
+          </a>
+
+          {% if user.is_authenticated %}
+            <button
+              id="generateSummaryBtn"
+              type="button"
+              class="btn btn-info btn-sm" {# Changed to info for distinction #}
+              data-summary-url="{% url 'news:generate_summary' slug=article.slug %}">
+              Generate/Regenerate Summary
+            </button>
+          {% endif %}
+        </div>
+
+        <div id="summaryLoading"
+             class="text-center mt-3 mb-4"
+             style="display: none;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading summary...</span>
+          </div>
+          <p class="text-muted mt-2">Generating summary...</p>
+        </div>
+
+      </div>
     </div>
+  </div>
 </div>
-{% endblock %}
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const generateBtn = document.getElementById('generateSummaryBtn');
-        const summaryLengthInput = document.getElementById('summaryLength');
-        const summarySection = document.getElementById('articleSummarySection');
-        const summaryContent = document.getElementById('summaryContent');
-        const summaryLoading = document.getElementById('summaryLoading');
+document.addEventListener('DOMContentLoaded', function() {
+  const btn         = document.getElementById('generateSummaryBtn');
+  const loader      = document.getElementById('summaryLoading');
+  const section     = document.getElementById('articleSummarySection');
+  const contentEl   = document.getElementById('summaryContent');
 
-        // Initial check: If a summary already exists, show the section
-        if (summaryContent.textContent.trim() !== "") {
-            summarySection.style.display = 'block';
+  function format(text) {
+    // Replace newlines with <br> tags for display, and ensure it's not null/empty
+    return text ? text.replace(/\n/g, '<br>') : '';
+  }
+
+  // Show stored summary if it exists on page load
+  const initialSummary = "{{ article.summary|escapejs }}";
+  if (initialSummary.trim()) {
+    contentEl.innerHTML = format(initialSummary);
+    section.style.display = 'block';
+  }
+
+  if (btn) {
+    btn.addEventListener('click', async function(e) {
+      e.preventDefault();
+
+      const url = this.dataset.summaryUrl; // No num_sentences parameter now
+
+      loader.style.display  = 'block';
+      section.style.display = 'none'; // Hide current summary/section
+      btn.disabled          = true; // Disable button during generation
+
+      try {
+        const res = await fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP Status ${res.status}: ${errorText}`);
+        }
+
+        const data = await res.json();
+        if (data.summary) {
+            contentEl.innerHTML = format(data.summary);
         } else {
-            summarySection.style.display = 'none';
+            contentEl.innerHTML = 'No summary returned.';
         }
-
-        if (generateBtn) {
-            generateBtn.addEventListener('click', async function() {
-                const slug = this.dataset.slug;
-                const numSentences = summaryLengthInput.value;
-                // Construct URL with num_sentences as a query parameter
-                const url = `/article/${slug}/generate_summary/?num_sentences=${numSentences}`;
-
-                // Show loading indicator, hide summary section
-                summaryLoading.style.display = 'block';
-                summarySection.style.display = 'none'; // Ensure summary is hidden while generating
-                generateBtn.disabled = true; // Disable button during generation
-
-                try {
-                    const response = await fetch(url, {
-                        method: 'GET', // Correctly using GET
-                        // Removed Content-Type and X-CSRFToken for GET request as they are not needed
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    if (data.summary) {
-                        summaryContent.textContent = data.summary;
-                        summarySection.style.display = 'block'; // Show summary section on success
-                    } else {
-                        summaryContent.textContent = "Summary could not be generated.";
-                        summarySection.style.display = 'block'; // Show section even with error message
-                    }
-
-                } catch (error) {
-                    console.error('Error generating summary:', error);
-                    summaryContent.textContent = "Failed to generate summary. Please try again.";
-                    summarySection.style.display = 'block'; // Show section with error message
-                } finally {
-                    summaryLoading.style.display = 'none'; // Hide loading indicator
-                    generateBtn.disabled = false; // Re-enable button
-                }
-            });
-        }
+      } catch (err) {
+        console.error("Error generating summary:", err);
+        contentEl.innerHTML = `Failed to generate summary: ${err.message}`;
+      } finally {
+        loader.style.display  = 'none';
+        section.style.display = 'block'; // Show summary section again
+        btn.disabled          = false; // Re-enable button
+      }
     });
+  }
+});
 </script>
+{% endblock %}

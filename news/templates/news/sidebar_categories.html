@@ -1,0 +1,12 @@
+<div class="widget mb-4">
+  <h5>Filter by Category</h5>
+  <ul class="list-unstyled">
+    {% for name in main_categories %}
+      <li>
+        <a href="{% url 'news:article_list' %}?category={{ name|urlencode }}">
+          {{ name }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>

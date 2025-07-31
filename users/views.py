@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required # Decorator to restrict access to logged-in users
 from django.contrib import messages # For displaying messages to the user
 from .forms import UserPreferenceForm, CustomUserCreationForm # Import your forms
-from .models import UserPreference # Import UserPreference model from the current app's models
+from .models import UserPreference # <--- CORRECTED: Import UserPreference from the current app's models
 from django.contrib.auth import authenticate, login # Import for login functionality
 
 

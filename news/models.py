@@ -24,7 +24,7 @@ class Article(models.Model):
     categories = models.ManyToManyField(Category, related_name='articles')
     summary = models.TextField(blank=True, null=True) # New field for summary
     # Ensure slug is always unique and not nullable after initial migration
-    slug = models.SlugField(unique=True, max_length=255, blank=True)
+    slug = models.SlugField(null=True, max_length=255, blank=True)
 
     # NEW FIELD FOR APPROVAL
     approved = models.BooleanField(default=False) # New field to track approval status

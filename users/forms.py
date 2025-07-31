@@ -1,25 +1,28 @@
 # bytenews/users/forms.py
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm # For user registration
-from django.contrib.auth.models import User # ADDED: Import the User model
-from .models import UserPreference # Correctly import UserPreference from the current app's models
-from news.models import Category # Category is correctly from news.models
+from news.models import Category # Category is correct, it's in news.models
+from .models import UserPreference # Import UserPreference from users.models
+from django.contrib.auth.forms import UserCreationForm # Import Django's built-in UserCreationForm
 
+# Assuming you have a custom User model, or you want to extend the default UserCreationForm
 class CustomUserCreationForm(UserCreationForm):
-    # You can add extra fields here if needed for registration, e.g., email
     class Meta(UserCreationForm.Meta):
-        model = User # Explicitly set the model to User
-        fields = UserCreationForm.Meta.fields + ('email',) # Example: add email field if your User model supports it
+        # If you have a custom user model, replace 'User' with your custom user model
+        # from django.contrib.auth import get_user_model
+        # User = get_user_model()
+        # model = User
+        fields = UserCreationForm.Meta.fields + ('email',) # Example: add email field if your user model has it
 
 class UserPreferenceForm(forms.ModelForm):
-    # ModelMultipleChoiceField with CheckboxSelectMultiple widget for checkboxes
+    # We want preferred_categories to show as checkboxes, not a multi-select dropdown
     preferred_categories = forms.ModelMultipleChoiceField(
-        queryset=Category.objects.all().order_by('name'), # Get all categories, ordered by name
-        widget=forms.CheckboxSelectMultiple, # This renders multiple checkboxes
+        queryset=Category.objects.all().order_by('name'),
+        widget=forms.CheckboxSelectMultiple,
         required=False # Preferences are optional
     )
 
     class Meta:
-        model = UserPreference # Link to the UserPreference model
-        fields = ['preferred_categories'] # Only this field will be displayed on the form
+        model = UserPreference
+        fields = ['preferred_categories'] # Only this field will be on the form
+

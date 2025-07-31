@@ -49,7 +49,8 @@ class Command(BaseCommand):
                             # summary will be generated below
                             approved=False # New articles are initially set to pending
                         )
-                        # Generate summary before saving
+                        # Generate summary before saving. The generate_summary function in utils
+                        # will now determine the sentence count dynamically.
                         article.summary = generate_summary(article.content, article_title=article.title)
                         
                         article.save() # Save the article first to get an ID for M2M relationship
@@ -70,4 +71,3 @@ class Command(BaseCommand):
             time.sleep(random.uniform(1, 3))
 
         self.stdout.write(self.style.SUCCESS(f'Scraping finished. Total new articles added: {total_articles_added}'))
-
